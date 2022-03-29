@@ -21,14 +21,14 @@ Pod::Spec.new do |s|
 TODO: Add long description of the pod here.
                        DESC
 
-  s.homepage         = 'https://github.com/jeason.l@qq.com/MSSerialPort'
+  s.homepage         = 'https://gitlab.com/JeasonLee/MSSerialPort'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'jeason.l@qq.com' => 'jeason.l@qq.com' }
-  s.source           = { :git => 'https://github.com/jeason.l@qq.com/MSSerialPort.git', :tag => s.version.to_s }
+  s.author           = { 'JeasonLee' => 'jeason.l@qq.com' }
+  s.source           = { :git => 'https://gitlab.com/JeasonLee/MSSerialPort.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '9.0'
+  s.ios.deployment_target = '10.0'
 
   s.source_files = 'MSSerialPort/Classes/**/*'
   
@@ -38,5 +38,7 @@ TODO: Add long description of the pod here.
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
+   s.dependency 'SwifterSwift/Foundation'
+   s.dependency 'SwifterSwift/SwiftStdlib'
+   s.dependency 'CryptoSwift'
 end
