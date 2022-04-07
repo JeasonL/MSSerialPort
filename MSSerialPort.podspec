@@ -27,7 +27,16 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '10.0'
   s.swift_versions = '5.0'
-  s.source_files = 'MSSerialPort/Classes/**/*'
+
+  s.subspec 'Product' do |ss|
+    ss.source_files = 'MSSerialPort/Classes/Product/*'
+  end
+  
+  s.subspec 'Util' do |ss|
+    ss.source_files = 'MSSerialPort/Classes/Util/*'
+  end
+  
+  # s.source_files = 'MSSerialPort/Classes/**/*'
   
   # s.resource_bundles = {
   #   'MSSerialPort' => ['MSSerialPort/Assets/*.png']
@@ -35,5 +44,4 @@ Pod::Spec.new do |s|
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
-#   s.dependency 'SwifterSwift/SwiftStdlib'
 end
