@@ -29,7 +29,7 @@ Pod::Spec.new do |s|
   s.swift_versions = '5.0'
 
   s.subspec 'Product' do |ss|
-    ss.source_files = 'MSSerialPort/Classes/Product/*'
+    ss.source_files = 'MSSerialPort/Classes/Product/**/*'
   end
   
   s.subspec 'Util' do |ss|
