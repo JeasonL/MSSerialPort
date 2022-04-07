@@ -22,7 +22,7 @@ pod 'MSSerialPort'
 
 ## Author
 
-jeason.l@qq.com, jeason.l@qq.com
+jeason.l, jeason.l@qq.com
 
 ## License
 

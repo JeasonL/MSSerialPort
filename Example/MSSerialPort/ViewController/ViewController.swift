@@ -9,13 +9,18 @@ import CryptoSwift
 import SnapKit
 import SwifterSwift
 import UIKit
+import MSSerialPort
 
 enum Factory: CaseIterable {
-    case Forick, Opike, Lemanli, Autorail
+    static var allCases: [Factory] = [.Forick, .Jiecang(type: .LiftCabinet), .Jiecang(type: .TranslationDesk), .Opike, .Lemanli, .Autorail]
+    
+    case Forick, Jiecang(type: Jiecang.ProductType), Opike, Lemanli, Autorail
     var name: String {
         switch self {
         case .Forick:
             return "弗雷克"
+        case let .Jiecang(type):
+            return "捷昌" + " - " + type.name
         case .Opike:
             return "欧派克"
         case .Lemanli:
@@ -29,6 +34,8 @@ enum Factory: CaseIterable {
         switch self {
         case .Forick:
             return ForickViewController()
+        case let .Jiecang(type):
+            return JiecangViewController(type: type)
         case .Opike:
             return OpikeViewController()
         case .Lemanli:

@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import SwifterSwift
 
 /**
  *************************
@@ -14,12 +13,29 @@ import SwifterSwift
  *************************
  */
 public struct Jiecang {
+    /// 产品类型
+    public enum ProductType {
+        case LiftCabinet, TranslationDesk
+
+        /// 产品名称
+        public var name: String {
+            switch self {
+            case .LiftCabinet:
+                return "升降吊柜"
+            case .TranslationDesk:
+                return "平移导台"
+            }
+        }
+    }
+
     /**
      *************************
      ***      升降吊柜       ***
      *************************
      */
     public struct LiftCabinet: JiecangProtocol {
+        public init() { }
+        
         private let defaultType = 0x88.toByte()
 
         /// 控制类型
@@ -85,7 +101,7 @@ public struct Jiecang {
             var command = Bytes(repeating: 0, count: count + 2)
             command[0] = defaultType
             command[1] = code
-            command.replaceSubrange(2 ..< count, with: bytes)
+            command.replaceSubrange(2 ..< (count + 2), with: bytes)
             return check(command)
         }
 
@@ -217,6 +233,8 @@ public struct Jiecang {
      *************************
      */
     public struct TranslationDesk: JiecangProtocol {
+        public init() { }
+        
         /**
          * 上升
          */
@@ -412,7 +430,7 @@ extension Jiecang {
         static func check(_ bytes: Bytes) -> Bytes {
             let count = bytes.count + 4
             var result = Bytes(repeating: 0, count: count)
-            let sum = bytes.map { $0.toIntU() }.sum()
+            let sum = bytes.map { $0.toIntU() }.reduce(into: 0, +=)
             result[0] = 0xF1.toByte()
             result[1] = 0xF1.toByte()
             result.replaceSubrange(2 ..< bytes.count, with: bytes)
@@ -444,7 +462,7 @@ extension Jiecang {
             result[1] = 0xAA.toByte()
             result[2] = bytes.count.toByte()
             result.replaceSubrange(3 ..< bytes.count, with: bytes)
-            let sum = result.map { $0.toIntU() }.sum()
+            let sum = result.map { $0.toIntU() }.reduce(into: 0, +=)
             result[count - 2] = sum.to2ByteLittle()[0]
             result[count - 1] = 0xAA.toByte()
             return result

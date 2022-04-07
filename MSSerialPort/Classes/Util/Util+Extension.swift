@@ -154,18 +154,7 @@ internal extension Byte {
     }
 }
 
-public extension Bytes {
-    /// Bytes 转成 Hex的字符串
-    /// - [10, 11, 12] -> "0A 0B 0C"
-    /// - Parameter hasSpace: 是否带空格
-    /// - Returns: Hex字符串
-    func toHexString(hasSpace: Bool = true) -> String {
-        let strings = map { byte -> String in
-            Int(byte).toHexString()
-        }
-        return strings.joined(separator: hasSpace ? " " : "")
-    }
-
+internal extension Bytes {
     /// 高位byte[]数组转成Int
     /// - 小端模式 无符号
     /// - byte[2] 转成 UInt16
@@ -207,5 +196,24 @@ public extension Bytes {
     private func toInt<T>(isBig: Bool) -> T where T: FixedWidthInteger {
         let value = withUnsafeBytes({ $0.load(as: T.self) })
         return isBig ? value.bigEndian : value.littleEndian
+    }
+}
+
+internal extension Bool {
+    var int: Int {
+        return self ? 1 : 0
+    }
+}
+
+public extension Bytes {
+    /// Bytes 转成 Hex的字符串
+    /// - [10, 11, 12] -> "0A 0B 0C"
+    /// - Parameter hasSpace: 是否带空格
+    /// - Returns: Hex字符串
+    func toHexString(hasSpace: Bool = true) -> String {
+        let strings = map { byte -> String in
+            Int(byte).toHexString()
+        }
+        return strings.joined(separator: hasSpace ? " " : "")
     }
 }

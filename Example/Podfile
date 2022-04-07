@@ -8,4 +8,7 @@ target 'MSSerialPort_Example' do
   pod 'SwiftNIO'
   pod 'SnapKit', '~> 5.0.0'
   pod 'SwifterSwift/UIKit'
+  pod 'SwifterSwift/Foundation'
+  pod 'SwifterSwift/SwiftStdlib'
+  pod 'CryptoSwift'
 end

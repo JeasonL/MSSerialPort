@@ -41,6 +41,8 @@ public struct Opike {
      *************************
      */
     public struct BusDoor: OpikeProtocol {
+        public init() { }
+        
         /// CMD
         public enum Cmd: Byte {
             /// 0x01 - 读出
@@ -421,7 +423,7 @@ extension Opike {
         /// 校验发送的指令
         /// - 从帧头开始按字节求和得出的结果, 低字节在前
         static func check(bytes: Bytes) -> Bytes {
-            let sum = bytes.map { $0.toIntU() }.sum()
+            let sum = bytes.map { $0.toIntU() }.reduce(into: 0, +=)
             let check = sum.to2ByteLittle()
             var result = Bytes(repeating: 0, count: bytes.count + check.count)
             result.replaceSubrange(0 ..< bytes.count, with: bytes)

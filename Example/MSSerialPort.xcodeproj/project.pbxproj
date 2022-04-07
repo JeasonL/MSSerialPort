@@ -12,6 +12,7 @@
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
+		9C13FAC327F3F67F00993BE8 /* JiecangViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C13FAC227F3F67F00993BE8 /* JiecangViewController.swift */; };
 		9CDCB0FF27F1933300C3147E /* MSNIOClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CDCB0F527F1933300C3147E /* MSNIOClient.swift */; };
 		9CDCB10027F1933300C3147E /* AutorailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CDCB0F727F1933300C3147E /* AutorailViewController.swift */; };
 		9CDCB10227F1933300C3147E /* BaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CDCB0F927F1933300C3147E /* BaseViewController.swift */; };
@@ -37,6 +38,7 @@
 		655384CC404776664C3673BD /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		73369B79F958301F19E32A05 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		74EE86FA7F19BFE5143C1DCE /* Pods-MSSerialPort_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSSerialPort_Tests.release.xcconfig"; path = "Target Support Files/Pods-MSSerialPort_Tests/Pods-MSSerialPort_Tests.release.xcconfig"; sourceTree = "<group>"; };
+		9C13FAC227F3F67F00993BE8 /* JiecangViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JiecangViewController.swift; sourceTree = "<group>"; };
 		9CDCB0F527F1933300C3147E /* MSNIOClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSNIOClient.swift; sourceTree = "<group>"; };
 		9CDCB0F727F1933300C3147E /* AutorailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutorailViewController.swift; sourceTree = "<group>"; };
 		9CDCB0F827F1933300C3147E /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 				9CDCB0F727F1933300C3147E /* AutorailViewController.swift */,
 				9CDCB0F927F1933300C3147E /* BaseViewController.swift */,
 				9CDCB0FB27F1933300C3147E /* ForickViewController.swift */,
+				9C13FAC227F3F67F00993BE8 /* JiecangViewController.swift */,
 				9CDCB0FA27F1933300C3147E /* LemanliViewController.swift */,
 				9CDCB0FE27F1933300C3147E /* OpikeViewController.swift */,
 				9CDCB0F827F1933300C3147E /* ViewController.swift */,
@@ -309,6 +312,7 @@
 			files = (
 				9CDCB10627F1933300C3147E /* OpikeViewController.swift in Sources */,
 				9CDCB10327F1933300C3147E /* LemanliViewController.swift in Sources */,
+				9C13FAC327F3F67F00993BE8 /* JiecangViewController.swift in Sources */,
 				9CDCB10427F1933300C3147E /* ForickViewController.swift in Sources */,
 				9CDCB10727F1933C00C3147E /* ViewController.swift in Sources */,
 				9CDCB0FF27F1933300C3147E /* MSNIOClient.swift in Sources */,

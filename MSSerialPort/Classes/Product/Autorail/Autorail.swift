@@ -19,6 +19,8 @@ public struct Autorail {
      *************************
      */
     public struct DreamCurtain: AutorailProtocol {
+        public init() { }
+        
         /**
           * 设置id
           *
