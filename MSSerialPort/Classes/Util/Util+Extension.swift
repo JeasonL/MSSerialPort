@@ -71,28 +71,6 @@ internal extension String {
 }
 
 internal extension Int {
-    /// Int -> Byte
-    func toByte() -> Byte {
-        let _max = Int(Byte.max)
-        return UInt8(Swift.max(0, Swift.min(self, _max)))
-    }
-
-    /// 数字补零
-    func zeroPadding() -> String {
-        return String(format: "%02d", self)
-    }
-
-    /// 转成16进制字符串
-    func toHexString() -> String {
-        let value = self & 0xFF
-        return String(format: "%02x", value).uppercased()
-    }
-
-    /// 转成2进制字符串
-    func toBitString() -> String {
-        return String(self, radix: 2)
-    }
-
     /// Int 转成 2个字节的 低位byte[]
     /// - 存储顺序(小端模式), 低位在前 高位在后
     func to2ByteLittle() -> Bytes {
@@ -202,6 +180,29 @@ internal extension Bytes {
 internal extension Bool {
     var int: Int {
         return self ? 1 : 0
+    }
+}
+
+public extension Int {
+    /// Int -> Byte
+    func toByte() -> Byte {
+        let _max = Int(Byte.max)
+        return UInt8(Swift.max(0, Swift.min(self, _max)))
+    }
+
+    /// 数字补零
+    func zeroPadding() -> String {
+        return String(format: "%02d", self)
+    }
+
+    /// 转成16进制字符串
+    func toHexString() -> String {
+        return String(format: "%02x", self).uppercased()
+    }
+
+    /// 转成2进制字符串
+    func toBitString() -> String {
+        return String(self, radix: 2)
     }
 }
 

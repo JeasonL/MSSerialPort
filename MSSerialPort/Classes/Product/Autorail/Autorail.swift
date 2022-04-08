@@ -33,7 +33,8 @@ public struct Autorail {
           * 0xFFFF == >> 0
           * - Parameter id: 大端模式,低位在前,高位在后; 高低位均不能为 0x00 和 0xFF
          */
-        public func setID(id: Bytes) -> Bytes {
+        public func setID(id: Int) -> Bytes {
+            let _id = id.to2ByteBig()
             let command: Bytes = [
                 0x55,
                 0,
@@ -41,36 +42,38 @@ public struct Autorail {
                 Mode.write.rawValue,
                 0,
                 0x02,
-                id[0],
-                id[1],
+                _id[0],
+                _id[1],
             ]
-            return command
+            return check(command)
         }
 
         /// 设置角度系数
         /// - Parameters:
         ///   - coefficient: 角度系数 0~255
-        public func setAngleCoefficient(id: Bytes, coefficient: Byte) -> Bytes {
+        public func setAngleCoefficient(id: Int, coefficient: Byte) -> Bytes {
+            let _id = id.to2ByteBig()
             let command: Bytes = [
                 0x55,
-                id[0],
-                id[1],
+                _id[0],
+                _id[1],
                 Mode.write.rawValue,
                 0x08,
                 0x01,
                 coefficient,
             ]
-            return command
+            return check(command)
         }
 
         /// 设置角度
         /// - Parameters:
         ///   - angle: 角度 0 ~ 180
-        public func setAngle(id: Bytes, angle: Byte) -> Bytes {
+        public func setAngle(id: Int, angle: Byte) -> Bytes {
+            let _id = id.to2ByteBig()
             let command: Bytes = [
                 0x55,
-                id[0],
-                id[1],
+                _id[0],
+                _id[1],
                 Mode.control.rawValue,
                 0x04,
                 0xFF.toByte(),
@@ -80,11 +83,12 @@ public struct Autorail {
         }
 
         /// 设置运行位置以及角度
-        public func setPercentAndAngle(id: Bytes, percent: Int, angle: Byte) -> Bytes {
+        public func setPercentAndAngle(id: Int, percent: Int, angle: Byte) -> Bytes {
+            let _id = id.to2ByteBig()
             let command: Bytes = [
                 0x55,
-                id[0],
-                id[1],
+                _id[0],
+                _id[1],
                 Mode.control.rawValue,
                 0x04,
                 percent.to2ByteLittle()[0],
@@ -96,11 +100,12 @@ public struct Autorail {
         /// 设置设备的方向
         /// - Parameters:
         ///   - isDefault true:默认方向  false:反方向
-        public func setDeviceDirection(id: Bytes, isDefault: Bool) -> Bytes {
+        public func setDeviceDirection(id: Int, isDefault: Bool) -> Bytes {
+            let _id = id.to2ByteBig()
             let command: Bytes = [
                 0x55,
-                id[0],
-                id[1],
+                _id[0],
+                _id[1],
                 Mode.write.rawValue,
                 0x03,
                 0x01,
@@ -110,11 +115,12 @@ public struct Autorail {
         }
 
         /// 控制命令-打开
-        public func on(id: Bytes) -> Bytes {
+        public func on(id: Int) -> Bytes {
+            let _id = id.to2ByteBig()
             let command: Bytes = [
                 0x55,
-                id[0],
-                id[1],
+                _id[0],
+                _id[1],
                 Mode.control.rawValue,
                 0x01,
             ]
@@ -122,11 +128,12 @@ public struct Autorail {
         }
 
         /// 控制命令-关闭
-        public func off(id: Bytes) -> Bytes {
+        public func off(id: Int) -> Bytes {
+            let _id = id.to2ByteBig()
             let command: Bytes = [
                 0x55,
-                id[0],
-                id[1],
+                _id[0],
+                _id[1],
                 Mode.control.rawValue,
                 0x02,
             ]
@@ -134,11 +141,12 @@ public struct Autorail {
         }
 
         /// 控制命令-关闭
-        public func stop(id: Bytes) -> Bytes {
+        public func stop(id: Int) -> Bytes {
+            let _id = id.to2ByteBig()
             let command: Bytes = [
                 0x55,
-                id[0],
-                id[1],
+                _id[0],
+                _id[1],
                 Mode.control.rawValue,
                 0x03,
             ]
@@ -146,11 +154,12 @@ public struct Autorail {
         }
 
         /// 运行至百分比
-        public func runPercent(id: Bytes, percent: Int) -> Bytes {
+        public func runPercent(id: Int, percent: Int) -> Bytes {
+            let _id = id.to2ByteBig()
             let command: Bytes = [
                 0x55,
-                id[0],
-                id[1],
+                _id[0],
+                _id[1],
                 Mode.control.rawValue,
                 0x04,
                 percent.to2ByteLittle()[0],
@@ -159,11 +168,12 @@ public struct Autorail {
         }
 
         /// 读取百分比
-        public func readPercent(id: Bytes) -> Bytes {
+        public func readPercent(id: Int) -> Bytes {
+            let _id = id.to2ByteBig()
             let command: Bytes = [
                 0x55,
-                id[0],
-                id[1],
+                _id[0],
+                _id[1],
                 Mode.read.rawValue,
                 0x02,
                 0x01,
@@ -172,11 +182,12 @@ public struct Autorail {
         }
 
         /// 读取方向状态
-        public func readDirection(id: Bytes) -> Bytes {
+        public func readDirection(id: Int) -> Bytes {
+            let _id = id.to2ByteBig()
             let command: Bytes = [
                 0x55,
-                id[0],
-                id[1],
+                _id[0],
+                _id[1],
                 Mode.read.rawValue,
                 0x03,
                 0x01,
@@ -185,11 +196,12 @@ public struct Autorail {
         }
 
         /// 读取设备类型
-        public func readDeviceType(id: Bytes) -> Bytes {
+        public func readDeviceType(id: Int) -> Bytes {
+            let _id = id.to2ByteBig()
             let command: Bytes = [
                 0x55,
-                id[0],
-                id[1],
+                _id[0],
+                _id[1],
                 Mode.read.rawValue,
                 0xF0.toByte(),
                 0x01,
@@ -197,12 +209,13 @@ public struct Autorail {
             return check(command)
         }
 
-        /// 读取所有信息
-        public func readAngle(id: Bytes) -> Bytes {
+        /// 读取角度
+        public func readAngle(id: Int) -> Bytes {
+            let _id = id.to2ByteBig()
             let command: Bytes = [
                 0x55,
-                id[0],
-                id[1],
+                _id[0],
+                _id[1],
                 Mode.read.rawValue,
                 0x06,
                 0x01,
@@ -211,11 +224,12 @@ public struct Autorail {
         }
 
         /// 读取当前角度系数
-        public func readAngleCoefficient(id: Bytes) -> Bytes {
+        public func readAngleCoefficient(id: Int) -> Bytes {
+            let _id = id.to2ByteBig()
             let command: Bytes = [
                 0x55,
-                id[0],
-                id[1],
+                _id[0],
+                _id[1],
                 Mode.read.rawValue,
                 0x08,
                 0x01,
