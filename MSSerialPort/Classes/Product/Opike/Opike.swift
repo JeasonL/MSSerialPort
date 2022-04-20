@@ -427,7 +427,7 @@ extension Opike {
             let check = sum.to2ByteLittle()
             var result = Bytes(repeating: 0, count: bytes.count + check.count)
             result.replaceSubrange(0 ..< bytes.count, with: bytes)
-            result.replaceSubrange(bytes.count ..< check.count, with: check)
+            result.replaceSubrange(bytes.count ..< result.count, with: check)
             return result
         }
     }
