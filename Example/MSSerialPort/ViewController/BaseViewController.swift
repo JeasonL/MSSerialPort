@@ -8,7 +8,7 @@
 import UIKit
 import MSSerialPort
 
-struct Item {
+struct CommandItem {
     var title: String = ""
     var subTitle: String = ""
     var command: Bytes = [] 
@@ -23,7 +23,7 @@ struct Item {
 
 class BaseViewController: UIViewController {
 //    var selectedClosure: ((Int) -> Void)?
-    var models: [Item] = []
+    var models: [CommandItem] = []
     
     var ip: String {
         return textField.text?.components(separatedBy: ":").first ?? ""

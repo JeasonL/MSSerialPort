@@ -13,9 +13,9 @@ class ForickViewController: BaseViewController {
         super.viewDidLoad()
         title = "弗雷克"
 
-        var items: [Item] = []
+        var items: [CommandItem] = []
         for ctrl in Forick.Ctrl.allCases {
-            items.append(Item(title: ctrl.name, command: ctrl.bytes))
+            items.append(CommandItem(title: ctrl.name, command: ctrl.bytes))
         }
         models = items
         tableView.reloadData()
