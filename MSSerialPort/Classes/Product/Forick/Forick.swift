@@ -13,89 +13,374 @@ import Foundation
  *************************
  */
 public struct Forick {
-    public enum Ctrl: CaseIterable {
-        case on, off, refrigeration, heating, arefaction, airSupply
+    /**
+     *************************
+     ***     三合一面板      ***
+     *************************
+     */
+    public struct TriadPanel: ForickProtocol {
+        public init() { }
 
-        public var bytes: Bytes {
-            let _bytes = hexs.map({ $0.hexToByte() })
-            return _bytes
+        /// 模式
+        public enum Mode: Int {
+            /// 空调
+            case aircon = 1
+            /// 地暖
+            case heating = 2
+            /// 新风
+            case freshAir = 3
         }
 
-        private var hexs: [String] {
-            return command.components(separatedBy: " ")
+        /// 空调模式
+        public enum AirconMode: Int {
+            /// 制冷
+            case cool = 0
+            /// 制热
+            case warm = 1
+            /// 除湿
+            case wet = 2
+            /// 送风
+            case wind = 3
         }
 
-        private var command: String {
-            switch self {
-            case .on:
-                return "06 00 01 00 01"
-            case .off:
-                return "06 00 01 00 00"
-            case .refrigeration:
-                return "06 00 02 00 00"
-            case .heating:
-                return "06 00 02 00 01"
-            case .arefaction:
-                return "06 00 02 00 02"
-            case .airSupply:
-                return "06 00 02 00 0"
+        /// 风速
+        public enum WindSpeed: Int {
+            /// 自动
+            case auto = 0
+            /// 低速
+            case low = 1
+            /// 中速
+            case middle = 2
+            /// 高速
+            case high = 3
+        }
+
+        /// 获取三选一面板当前的状态
+        public var currentStatus: Bytes {
+            return [TCType.STATUS_GET.rawValue]
+        }
+
+        /// 接收通知的时间限制
+        public var notifyTime: Bytes {
+            return [TCType.GET_NOTIFY.rawValue]
+        }
+
+        /**
+         * 设置多少秒内空调状态变化会主动往外发消息
+         * @param time [INT_MAX_POWER_OF_TWO]
+         */
+        public func setNotify(time: Int) -> Bytes {
+            var command = Bytes(repeating: 0, count: 5)
+            command[0] = TCType.SET_NOTIFY.rawValue
+            let timeArray = time.to4ByteLittle()
+            command.replaceSubrange(1 ..< command.count, with: timeArray)
+            return command
+        }
+
+        /// 设置面板模式
+        /// - Parameter mode:  01 空调  02 地暖 03 新风
+        public func setPanelMode(mode: Mode) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.WORK_MODE.rawValue
+            Forick.shortToByteBE(input: mode.rawValue, output: &command, offset: 2)
+            return command
+        }
+
+        /// 设置空调开关机
+        /// - Parameter isSwitch: false是关机  true是开机
+        public func setAircon(isSwitch: Bool) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.AC_ONOFF.rawValue
+            Forick.shortToByteBE(input: isSwitch.int, output: &command, offset: 2)
+            return command
+        }
+
+        /// 设置空调模式
+        /// - Parameter mode: 00：制冷  01：制热 02：除湿 03：送风
+        public func setAircon(mode: AirconMode) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.AC_MODE.rawValue
+            Forick.shortToByteBE(input: mode.rawValue, output: &command, offset: 2)
+            return command
+        }
+
+        /// 设置空调风速
+        /// - Parameter speed: 0:自动 1:低速 2:中速 3:高速
+        public func setAircon(speed: WindSpeed) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.AC_SPEED.rawValue
+            if speed == .auto {
+                Forick.shortToByteBE(input: 256, output: &command, offset: 2)
+            } else {
+                Forick.shortToByteBE(input: speed.rawValue, output: &command, offset: 2)
             }
+            return command
         }
 
-        public var name: String {
-            switch self {
-            case .on:
-                return "开机"
-            case .off:
-                return "关闭"
-            case .refrigeration:
-                return "制冷"
-            case .heating:
-                return "制热"
-            case .arefaction:
-                return "除湿"
-            case .airSupply:
-                return "送风"
+        /// 设置空调的制冷/制热的温度
+        /// - Parameter temperature: 10℃~32℃之间
+        public func setAircon(temperature: Int) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.AC_TEMPERATURE.rawValue
+            Forick.shortToByteBE(input: temperature * 10, output: &command, offset: 2)
+            return command
+        }
+
+        /// 设置空调继电器的控制模式
+        /// (空调的优先级高) 自控是面板内部逻辑控制开关，被控是通过指令控制开关，不过这个被控你们应该是没做处理的，都是采用我们面板内部逻辑控制
+        /// - Parameter relay:  继电器
+        ///  1: 一路双线阀或一路三线阀（一控）默认
+        ///  2: 一路三线阀（二控）
+        ///  3: 两路双线阀或一路三线阀（一控）
+        public func setAircon(relay: Int) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.AC_RELAY.rawValue
+            command[2] = 0x01
+            command[3] = relay.to2ByteLittle()[0]
+            return command
+        }
+
+        /// 设置地暖开关机
+        /// - Parameter isSwitch: false是关机  true是开机
+        public func setHeating(isSwitch: Bool) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.FH_ONOFF.rawValue
+            Forick.shortToByteBE(input: isSwitch.int, output: &command, offset: 2)
+            return command
+        }
+
+        /// 设置地暖温度
+        /// - Parameter temperature: 10℃~32℃之间
+        public func setHeating(temperature: Int) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.FH_TEMPERATURE.rawValue
+            Forick.shortToByteBE(input: temperature * 10, output: &command, offset: 2)
+            return command
+        }
+
+        /// 设置地暖保护温度
+        /// - Parameter temperature: 1℃~5℃之间
+        public func setHeatingProtection(temperature: Int) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.FH_PROTECT_TEMP.rawValue
+            Forick.shortToByteBE(input: temperature * 10, output: &command, offset: 2)
+            return command
+        }
+
+        /// 设置新风开关机
+        /// - Parameter isSwitch: false是关机  true是开机
+        public func setFreshAir(isSwitch: Bool) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.FA_ONOFF.rawValue
+            Forick.shortToByteBE(input: isSwitch.int, output: &command, offset: 2)
+            return command
+        }
+
+        /// 设置新风风速
+        /// - Parameter speed: 1:低速 2:中速 3:高速
+        public func setFreshAir(speed: WindSpeed) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.FA_SPEED.rawValue
+            Forick.shortToByteBE(input: speed.rawValue, output: &command, offset: 2)
+            return command
+        }
+
+        /// 环境参数 温度补偿（实时温度修正）
+        /// -9℃ ~ 9℃ 整数位有效
+        /// 00H ~ 09H 代表  0℃ ~ 9℃
+        /// F7H ~ FFH 代表  -9℃ ~ -1℃
+        /// - Parameter: temperature 修正温度的值 范围: -9 ~ 9
+        /// [temp]:(小 ---->> 大) [-9 , 9]
+        /// -9 ==> F7  -8 ==> F8    -7 ==> F9    -6 ==> FA    -5 ==> FB    -4 ==> FC    -3 ==> FD    -2 ==> FE    -1 ==> FF
+        ///  0 ==> 00  1 ==> 01  2 ==> 02     3 ==> 03     4 ==> 04     5 ==> 05     6 ==> 06     7 ==> 07     8 ==> 08    9 ==> 09
+        public func setComp(temperature: Int) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.COMP_TEMP.rawValue
+            Forick.shortToByteBE(input: temperature * 10, output: &command, offset: 2)
+            return command
+        }
+
+        /// 背光休眠时间
+        /// - Parameter duration: 有7个等级
+        ///     0: 30秒,
+        ///     1-5: 1-5分钟,
+        ///     6:不休眠
+        public func setBackground(duration: Int) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.BG_DURATION.rawValue
+            if duration == 0 {
+                Forick.shortToByteBE(input: 30, output: &command, offset: 2)
+            } else if (1 ... 5).contains(duration) {
+                Forick.shortToByteBE(input: duration * 60, output: &command, offset: 2)
+            } else {
+                Forick.shortToByteBE(input: 65535, output: &command, offset: 2)
             }
+            return command
         }
 
-        public var index: Int {
-            return Ctrl.allCases.firstIndex(of: self) ?? 0
+        /// 背光亮度
+        /// - Parameters:
+        ///   - lightness: 屏幕的亮度，值：35 45 55 65 75 85
+        ///   - keyLightness: 唤醒时，按键灯的亮度，值：35 45 55 65 75 85
+        public func setBackground(lightness: Int, keyLightness: Int) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.BG_LIGHTNESS.rawValue
+            command[2] = (keyLightness & 0xFF).toByte()
+            command[3] = (lightness & 0xFF).toByte()
+            return command
         }
+    }
+}
 
-        public static func ctrl(by index: Int) -> Ctrl {
-            return Ctrl.allCases.first(where: { $0.index == index }) ?? .on
+extension Forick {
+    /// 指令类型
+    public enum Types: Byte {
+        case WORK_MODE = 0x00
+
+        case AC_ONOFF = 0x01
+        case AC_MODE = 0x02
+        case AC_SPEED = 0x03
+        case AC_TEMPERATURE = 0x04
+        case AC_VALVE = 0x05
+        case AC_RELAY = 0x06
+
+        case FH_ONOFF = 0x07
+        case FH_TEMPERATURE = 0x08
+        case FH_VALVE = 0x09
+        case FH_RELAY = 0x0A
+        case FH_PROTECT_TEMP = 0x0B
+
+        case FA_ONOFF = 0x0C
+        case FA_SPEED = 0x0D
+        case FA_RELAY = 0x0E
+
+        case COMP_TEMP = 0x0F
+        case ENV_TEMP = 0x10
+        case ENV_HUMIDITY = 0x11
+
+        case LOW_TEMP = 0x12
+
+        case BG_DURATION = 0x13
+        case BG_LIGHTNESS = 0x14
+    }
+
+    static let VENDOROP_TC: UInt16 = 0x7FB0 // tc = temperature control
+
+    public enum TCType: Byte {
+        case STATUS_GET = 0x00
+        case STATUS_RET = 0x01
+        case SET = 0x02
+        case SET_RESULT = 0x03
+
+        case GET_NOTIFY = 0x04
+        case SET_NOTIFY = 0x05
+        case RET_NOTIFY = 0x06
+    }
+
+    public static func byteToShortBE(input: Bytes, offset: Int) -> Int8 {
+        return Int8((input[0 + offset] & 0xff) << 8 | input[1 + offset] & 0xff)
+    }
+
+    public static func shortToByteBE(input: Int, output: inout Bytes, offset: Int) {
+        output[0 + offset] = (input >> 8).toByte()
+        output[1 + offset] = input.toByte()
+    }
+
+    public func tcStatus(_ type: Types, data: UInt16) {
+        switch type {
+        case .WORK_MODE:
+            print("WORK MODE " + String(data))
+            break
+        case .AC_ONOFF:
+            print("AC ONOFF " + String(data & 0x0F))
+            break
+        case .AC_MODE:
+            print("AC MODE " + String(data & 0x0F))
+            break
+        case .AC_SPEED:
+            print("AC SPEED " + String(data & 0x0F) + ", AUTO " + String(isBitSet(Int(data), bit: 8)))
+            break
+        case .AC_TEMPERATURE:
+            print("AC TEMPERATURE " + String(Float(data) / 10.0))
+            break
+        case .AC_VALVE:
+            print("AC VALVE " + String(data))
+            break
+        case .AC_RELAY:
+            print("AC RELAY " + String(data))
+            break
+        case .FH_ONOFF:
+            print("FH ONOFF " + String(data & 0x0F))
+            break
+        case .FH_TEMPERATURE:
+            print("FH TEMPERATURE " + String(Float(data) / 10.0))
+            break
+        case .FH_VALVE:
+            print("FH VALVE " + String(data))
+            break
+        case .FH_RELAY:
+            print("FH RELAY " + String(data))
+            break
+        case .FH_PROTECT_TEMP:
+            print("FH PROTECT TEMP " + String(Float(data) / 10.0))
+            break
+        case .FA_ONOFF:
+            print("acStatus FA ONOFF " + String(data))
+            break
+        case .FA_SPEED:
+            print("FA SPEED " + String(data))
+            break
+        case .FA_RELAY:
+            print("FA RELAY " + String(data))
+            break
+        case .COMP_TEMP:
+            print("COMP TEMPERATURE " + String(Float(data) / 10.0))
+            break
+        case .ENV_TEMP:
+            print("ENV TEMPERATURE " + String(Float(data) / 10.0))
+            break
+        case .ENV_HUMIDITY:
+            print("ENV HUMIDITY " + String(data))
+            break
+        case .LOW_TEMP:
+            print("LOW TEMPERATURE " + String(Float(data) / 10.0))
+            break
+        case .BG_DURATION:
+            print("BG DURATION " + String(data))
+            break
+        case .BG_LIGHTNESS:
+            print("BG LIGHTNESS " + String((data >> 8) & 0xFF) + ", " + String(data & 0xFF))
+            break
         }
     }
 
-    public struct Command {
-        var ctrl: Ctrl
-        var address: String = "01"
+    private func isBitSet(_ mask: Int, bit: Int) -> Bool {
+        return 0 != (mask & 1 << bit)
+    }
+}
 
-        var bytes: Bytes {
-            let bytes = [address.hexToByte()] + ctrl.bytes
-            let check = Forick.CRC.crc16LowBefore(bytes)
-            let chars = String(check, radix: 16).uppercased().hexsToBytes()
-            return bytes + chars
-        }
+internal protocol ForickProtocol: ThirdPartyProtocol {}
+
+extension ForickProtocol where Self == Forick.TriadPanel {
+    internal var describe: String {
+        return "弗雷克三选一温控面板--蓝牙版本--佩林协议"
     }
 
-    /// CRC校验
-    private struct CRC {
-        private static var auchCRCHi: Bytes = [0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40]
-
-        private static var auchCRCLo: Bytes = [0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4, 0x04, 0xCC, 0x0C, 0x0D, 0xCD, 0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09, 0x08, 0xC8, 0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F, 0xDD, 0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6, 0xD2, 0x12, 0x13, 0xD3, 0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1, 0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7, 0x37, 0xF5, 0x35, 0x34, 0xF4, 0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A, 0x3B, 0xFB, 0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA, 0xEE, 0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5, 0x27, 0xE7, 0xE6, 0x26, 0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0, 0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2, 0x62, 0x66, 0xA6, 0xA7, 0x67, 0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F, 0x6E, 0xAE, 0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79, 0xBB, 0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C, 0xB4, 0x74, 0x75, 0xB5, 0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73, 0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91, 0x51, 0x93, 0x53, 0x52, 0x92, 0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C, 0x5D, 0x9D, 0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98, 0x88, 0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F, 0x8D, 0x4D, 0x4C, 0x8C, 0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80, 0x40]
-
-        static func crc16LowBefore(_ bytes: Bytes) -> Int {
-            var uchCRCHi = 0xFF
-            var uchCRCLo = 0xFF
-            var uIndex: Int
-            for msg in bytes {
-                uIndex = uchCRCHi ^ (Int(msg) & 0xFF)
-                uchCRCHi = uchCRCLo ^ Int(auchCRCHi[uIndex])
-                uchCRCLo = Int(auchCRCLo[uIndex])
-            }
-            return (uchCRCHi << 8) | uchCRCLo
-        }
+    internal func check(_ bytes: Bytes) -> Bytes {
+        return []
     }
 }

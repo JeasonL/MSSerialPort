@@ -187,7 +187,7 @@ public extension Int {
     /// Int -> Byte
     func toByte() -> Byte {
         let _max = Int(Byte.max)
-        return UInt8(Swift.max(0, Swift.min(self, _max)))
+        return UInt8(Swift.max(0, Swift.min(self & 0xff, _max)))
     }
 
     /// 数字补零
