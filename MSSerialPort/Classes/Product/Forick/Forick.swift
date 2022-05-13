@@ -134,6 +134,7 @@ public struct Forick {
         /// 设置空调继电器的控制模式
         /// (空调的优先级高) 自控是面板内部逻辑控制开关，被控是通过指令控制开关，不过这个被控你们应该是没做处理的，都是采用我们面板内部逻辑控制
         /// - Parameter relay:  继电器
+        ///  0: 无效
         ///  1: 一路双线阀或一路三线阀（一控）默认
         ///  2: 一路三线阀（二控）
         ///  3: 两路双线阀或一路三线阀（一控）
@@ -141,8 +142,35 @@ public struct Forick {
             var command = Bytes(repeating: 0, count: 4)
             command[0] = TCType.SET.rawValue
             command[1] = Types.AC_RELAY.rawValue
-            command[2] = 0x01
-            command[3] = relay.to2ByteLittle()[0]
+            command[2] = relay == 0 ? 0 : 0x01
+            command[3] = relay == 0 ? 0 : relay.to2ByteLittle()[0]
+            return command
+        }
+
+        /// 设置地暖继电器的控制模式
+        /// - Parameter relay:  继电器
+        ///  0: 无效
+        ///  1: 一路双线阀或一路三线阀（一控）默认
+        ///  2: 一路三线阀（二控）
+        public func setHeating(relay: Int) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.FH_RELAY.rawValue
+            command[2] = relay == 0 ? 0 : 0x01
+            command[3] = relay == 0 ? 0 : relay.to2ByteLittle()[0]
+            return command
+        }
+
+        /// 设置新风继电器的控制模式
+        /// - Parameter relay:  继电器
+        /// 0: 无效（默认，继电器不受控）
+        /// 1: 有效（寄存器 0016 的奇存器数据无效时）
+        public func setFreshAir(relay: Int) -> Bytes {
+            var command = Bytes(repeating: 0, count: 4)
+            command[0] = TCType.SET.rawValue
+            command[1] = Types.FA_RELAY.rawValue
+            command[2] = relay == 0 ? 0 : 0x01
+            command[3] = relay == 0 ? 0 : relay.to2ByteLittle()[0]
             return command
         }
 
@@ -292,7 +320,7 @@ extension Forick {
     }
 
     public static func byteToShortBE(input: Bytes, offset: Int) -> Int8 {
-        return Int8((input[0 + offset] & 0xff) << 8 | input[1 + offset] & 0xff)
+        return Int8((input[0 + offset] & 0xFF) << 8 | input[1 + offset] & 0xFF)
     }
 
     public static func shortToByteBE(input: Int, output: inout Bytes, offset: Int) {
