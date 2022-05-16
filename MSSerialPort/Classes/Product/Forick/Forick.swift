@@ -1,6 +1,6 @@
 //
 //  ForickCRC.swift
-//  MSSwiftNIO
+//  MSSerialPort
 //
 //  Created by Jeason Lee on 2022/3/23.
 //
@@ -319,8 +319,9 @@ extension Forick {
         case RET_NOTIFY = 0x06
     }
 
-    public static func byteToShortBE(input: Bytes, offset: Int) -> Int8 {
-        return Int8((input[0 + offset] & 0xFF) << 8 | input[1 + offset] & 0xFF)
+    public static func byteToShortBE(input: Bytes, offset: Int) -> Int {
+        let data = Bytes([input[offset + 1], input[offset]])
+        return ((Int(data[1]) & 0xFF) << 8) | (Int(data[0]) & 0xFF)
     }
 
     public static func shortToByteBE(input: Int, output: inout Bytes, offset: Int) {
@@ -328,75 +329,98 @@ extension Forick {
         output[1 + offset] = input.toByte()
     }
 
-    public func tcStatus(_ type: Types, data: UInt16) {
+    public static func tcStatus(_ type: Types, data: Int) -> String {
+        var string = ""
         switch type {
         case .WORK_MODE:
-            print("WORK MODE " + String(data))
+            string = String(data)
+            print("WORK MODE " + string)
             break
         case .AC_ONOFF:
-            print("AC ONOFF " + String(data & 0x0F))
+            string = String(data & 0x0F)
+            print("AC ONOFF " + string)
             break
         case .AC_MODE:
-            print("AC MODE " + String(data & 0x0F))
+            string = String(data & 0x0F)
+            print("AC MODE " + string)
             break
         case .AC_SPEED:
+            string = String(data & 0x0F) + "," + String(isBitSet(Int(data), bit: 8).int)
             print("AC SPEED " + String(data & 0x0F) + ", AUTO " + String(isBitSet(Int(data), bit: 8)))
             break
         case .AC_TEMPERATURE:
-            print("AC TEMPERATURE " + String(Float(data) / 10.0))
+            string = String(Float(data) / 10.0)
+            print("AC TEMPERATURE " + string)
             break
         case .AC_VALVE:
-            print("AC VALVE " + String(data))
+            string = String(data)
+            print("AC VALVE " + string)
             break
         case .AC_RELAY:
-            print("AC RELAY " + String(data))
+            string = String(data)
+            print("AC RELAY " + string)
             break
         case .FH_ONOFF:
+            string = String(data & 0x0F)
             print("FH ONOFF " + String(data & 0x0F))
             break
         case .FH_TEMPERATURE:
-            print("FH TEMPERATURE " + String(Float(data) / 10.0))
+            string = String(Float(data) / 10.0)
+            print("FH TEMPERATURE " + string)
             break
         case .FH_VALVE:
-            print("FH VALVE " + String(data))
+            string = String(data)
+            print("FH VALVE " + string)
             break
         case .FH_RELAY:
-            print("FH RELAY " + String(data))
+            string = String(data)
+            print("FH RELAY " + string)
             break
         case .FH_PROTECT_TEMP:
-            print("FH PROTECT TEMP " + String(Float(data) / 10.0))
+            string = String(Float(data) / 10.0)
+            print("FH PROTECT TEMP " + string)
             break
         case .FA_ONOFF:
-            print("acStatus FA ONOFF " + String(data))
+            string = String(data)
+            print("acStatus FA ONOFF " + string)
             break
         case .FA_SPEED:
-            print("FA SPEED " + String(data))
+            string = String(data)
+            print("FA SPEED " + string)
             break
         case .FA_RELAY:
-            print("FA RELAY " + String(data))
+            string = String(data)
+            print("FA RELAY " + string)
             break
         case .COMP_TEMP:
-            print("COMP TEMPERATURE " + String(Float(data) / 10.0))
+            string = String(Float(data) / 10.0)
+            print("COMP TEMPERATURE " + string)
             break
         case .ENV_TEMP:
-            print("ENV TEMPERATURE " + String(Float(data) / 10.0))
+            string = String(Float(data) / 10.0)
+            print("ENV TEMPERATURE " + string)
             break
         case .ENV_HUMIDITY:
-            print("ENV HUMIDITY " + String(data))
+            string = String(data)
+            print("ENV HUMIDITY " + string)
             break
         case .LOW_TEMP:
-            print("LOW TEMPERATURE " + String(Float(data) / 10.0))
+            string = String(Float(data) / 10.0)
+            print("LOW TEMPERATURE " + string)
             break
         case .BG_DURATION:
-            print("BG DURATION " + String(data))
+            string = String(data)
+            print("BG DURATION " + string)
             break
         case .BG_LIGHTNESS:
-            print("BG LIGHTNESS " + String((data >> 8) & 0xFF) + ", " + String(data & 0xFF))
+            string = String((data >> 8) & 0xFF) + "," + String(data & 0xFF)
+            print("BG LIGHTNESS " + string)
             break
         }
+        return string
     }
 
-    private func isBitSet(_ mask: Int, bit: Int) -> Bool {
+    private static func isBitSet(_ mask: Int, bit: Int) -> Bool {
         return 0 != (mask & 1 << bit)
     }
 }

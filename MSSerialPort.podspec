@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'MSSerialPort'
-  s.version          = '0.0.5'
+  s.version          = '0.0.6'
   s.summary          = '玛格智能家居串口控制命令'
 
 # This description is used to generate tags and improve search results.
