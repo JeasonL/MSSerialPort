@@ -70,7 +70,7 @@ internal extension String {
     }
 }
 
-internal extension Int {
+public extension Int {
     /// Int 转成 2个字节的 低位byte[]
     /// - 存储顺序(小端模式), 低位在前 高位在后
     func to2ByteLittle() -> Bytes {
