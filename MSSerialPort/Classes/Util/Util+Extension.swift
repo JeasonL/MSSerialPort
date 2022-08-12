@@ -10,7 +10,7 @@ import Foundation
 public typealias Byte = UInt8
 public typealias Bytes = [UInt8]
 
-internal extension String {
+public extension String {
     /// 多16进制字符串 转 Bytes
     /// "0A 0B 0C" -> [10, 11, 12]
     func hexsToBytes() -> Bytes {
@@ -71,6 +71,27 @@ internal extension String {
 }
 
 public extension Int {
+    /// Int -> Byte
+    func toByte() -> Byte {
+        let _max = Int(Byte.max)
+        return UInt8(Swift.max(0, Swift.min(self & 0xff, _max)))
+    }
+
+    /// 数字补零
+    func zeroPadding() -> String {
+        return String(format: "%02d", self)
+    }
+
+    /// 转成16进制字符串
+    func toHexString() -> String {
+        return String(format: "%02x", self).uppercased()
+    }
+
+    /// 转成2进制字符串
+    func toBitString() -> String {
+        return String(self, radix: 2)
+    }
+
     /// Int 转成 2个字节的 低位byte[]
     /// - 存储顺序(小端模式), 低位在前 高位在后
     func to2ByteLittle() -> Bytes {
@@ -100,7 +121,7 @@ public extension Int {
     }
 }
 
-internal extension Array where Element == String {
+public extension Array where Element == String {
     /// 16进制字符串数组 转 十进制数组
     /// - ["0A", "0B", "0C"] -> [10, 11, 12]
     func toByte() -> Bytes {
@@ -108,7 +129,7 @@ internal extension Array where Element == String {
     }
 }
 
-internal extension Byte {
+public extension Byte {
     /// 转成Int后再进行补码
     func toIntU() -> Int {
         return Int(self) & 0xFF
@@ -132,7 +153,18 @@ internal extension Byte {
     }
 }
 
-internal extension Bytes {
+public extension Bytes {
+    /// Bytes 转成 Hex的字符串
+    /// - [10, 11, 12] -> "0A 0B 0C"
+    /// - Parameter hasSpace: 是否带空格
+    /// - Returns: Hex字符串
+    func toHexString(hasSpace: Bool = true) -> String {
+        let strings = map { byte -> String in
+            Int(byte).toHexString()
+        }
+        return strings.joined(separator: hasSpace ? " " : "")
+    }
+
     /// 高位byte[]数组转成Int
     /// - 小端模式 无符号
     /// - byte[2] 转成 UInt16
@@ -177,44 +209,8 @@ internal extension Bytes {
     }
 }
 
-internal extension Bool {
+public extension Bool {
     var int: Int {
         return self ? 1 : 0
-    }
-}
-
-public extension Int {
-    /// Int -> Byte
-    func toByte() -> Byte {
-        let _max = Int(Byte.max)
-        return UInt8(Swift.max(0, Swift.min(self & 0xff, _max)))
-    }
-
-    /// 数字补零
-    func zeroPadding() -> String {
-        return String(format: "%02d", self)
-    }
-
-    /// 转成16进制字符串
-    func toHexString() -> String {
-        return String(format: "%02x", self).uppercased()
-    }
-
-    /// 转成2进制字符串
-    func toBitString() -> String {
-        return String(self, radix: 2)
-    }
-}
-
-public extension Bytes {
-    /// Bytes 转成 Hex的字符串
-    /// - [10, 11, 12] -> "0A 0B 0C"
-    /// - Parameter hasSpace: 是否带空格
-    /// - Returns: Hex字符串
-    func toHexString(hasSpace: Bool = true) -> String {
-        let strings = map { byte -> String in
-            Int(byte).toHexString()
-        }
-        return strings.joined(separator: hasSpace ? " " : "")
     }
 }
